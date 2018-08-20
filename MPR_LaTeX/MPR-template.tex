@@ -135,6 +135,15 @@ Our method is implemented with a FCN (Fully Convolutional Network). The range im
 
 It's important to aware that our data frames are captured sequentially. In order to avoid data correlation between adjacent frames, shuffling them before training process is necessary.
 
+\subsection{Results}
+% 加图片！！！！！！！！！！！！！！！！！！！！！
+The qualitative results are shown in Fig. We use mPA (mean pixel accuracy) for quantitative evaluation of semantic segmentation performance. Specially, when calculating the mean pixel accuracy, unknown or invalid pixels with label 0 will not be involved in. The mPA is computed as the following formula, while $\dot{Y}_k$ is the predicted pixel set with label $k$ and $Y_k$ is the ground truth pixel set.
+
+
+\begin{equation}
+mPA = \dfrac{1}{K}*\sum_{k=1}^{K}\dfrac{\left| \dot{Y}_k \cap Y_k \right|}{\left| \dot{Y}_k\right|}
+\end{equation}
+
 \subsection{Preparing your Electronic Paper}
 
 {\em Type sizes and typefaces}: Follow the type sizes specified in
