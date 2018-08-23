@@ -41,11 +41,44 @@ This work studies semantic segmentation of 3D LiDAR data at dynamic urban scenes
 
 \section{Introduction}
 % no \PARstart
-empty
+	Scene understanding is crucial for the safe and efficient navigation of autonomous vehicles in complex and dynamic environments, and semantic segmentation is a key technique. 3D LiDAR has been used as one of the main sensors in many prototyping systems for fully autonomous driving\cite{urmson2008autonomous}. Semantic segmentation using 3D LiDAR data is illustrated in Fig. \ref{fig:dynamiccampus}, where given a frame of input data (a), the problem is to find a meaningful label (i.e., object class in this research) for each pixel, super-pixel or region of the data (b). As 3D LiDAR is a 2.5D sensing of the surroundings, it can be represented equivalently in the form of a range image (c)-(d) in the polar coordinate system, and the problem of semantic segmentation can be solved by using either 3D points or range images as the input.
+	
+	Semantic segmentation using 3D LiDAR data from outdoor scenes has been studied since the past decade \cite{urmson2008autonomous,moosmann2009segmentation,douillard2011segmentation}. The traditional process in these works \cite{munoz2009onboard,zhao2010scene} includes the following steps: (1) preprocessing to divide a whole dataset into locally consistent small units, such as voxels, segments or clusters; (2) extracting a sequence of predefined features; (3) learning a classifier via SVM, random forest etc.; and (4) refining the results using a method such as conditional random field by considering the spatial consistency among neighboring units. On one hand, the criteria of units in preprocessing are empirically defined, for example, the size of voxels\cite{hackel2017isprs}; one the other hand, the traditional methods depend on carefully designed discriminative features, and their adaptability to different scenes remains an open challenge.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\textwidth]{fig/Fig1.png}
+		\caption{The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and range frame. (b) and (d) show the semantic segmentation results.}
+		\label{fig:dynamiccampus}
+	\end{figure}	
+	
+	The recent success of deep learning in image semantic segmentation has provided new approaches\cite{garcia2017review}. These methods remove the dependence on handcrafted features in an end-to-end manner. Especially, the propose of FCN-based methods\cite{long2015fully} where the semantic segmentation is converted into a pixel-wise classification to reduce the dependence of unit's definition in preprocessing. However, these methods also have substantial demands for finely labeled data\cite{garcia2017review}, and few 3D LiDAR datasets with annotation at the point level to support autonomous driving applications are publicly available. Therefore, the attempts of a point-wise segmentation method for 3D LiDAR data and a fine annotation dataset are necessary.
+	
+	In this paper, we propose a new 3D LiDAR data semantic segmentation method that takes the range frame as input and make a point-wise classification via deep neural network. We evaluate its performance on a new 3D point cloud dataset collected in dynamic urban scenes by our driving platform. The experiments show that our method can recognize more kinds of labels and achieve an impressive result in dynamic urban scenes.
+	
+	The remainder of this paper is organized as follows. Related work is discussed in Sect. \uppercase\expandafter{\romannumeral2}. In Sect. \uppercase\expandafter{\romannumeral3}, the proposed method is presented. Then, we present the experimental results in Sect. \uppercase\expandafter{\romannumeral4} and draw conclusions in Sect. \uppercase\expandafter{\romannumeral5}.
+	
 
 \section{Related works}
-% no \PARstart
-empty
+	\subsection{Feature-based Methods}
+	Feature-based methods belong to traditional machine learning, and the general process of these methods consists of feature selection, classifier design and graphical model description.
+	
+	A straightforward technique is to convert semantic segmentation into a point-wise classification that includes extracting the features on each unit, concatenating the features as a vector and determining the label via a well-trained classifier. \cite{weinmann2014semantic} presents a common pipeline from feature selection to classifier training. Due to the irregular arrangement of point clouds, the authors test 5 definitions of neighborhood to achieve the best representation. Similar research is conducted in \cite{hackel2016fast}, which demonstrates the ability to address varying densities of data. A single point cloud usually contains millions of points, so evaluating the label for each point is typically computationally expensive (on the order of minutes according to \cite{hackel2016fast}). 
+	
+	\cite{hu2013efficient} proposes an efficient approach where speed and accuracy are satisfied simultaneously; furthermore, the average classification time can be reduced to less than 1 s. \cite{zhao2010scene} represents the raw point cloud as a 2D range image and proposes a framework for simultaneous segmentation and classification of the range image that considers both the 2D range image and 3D raw data. Straightforward approaches assume that each data unit is independent and ignore the spatial and contextual relations between units. Consequently, they can produce good results based on distinctive features. However, when the features are not discriminative, the point-wise classification will be noisy and locally inconsistent\cite{munoz2009onboard}.
+	
+	The neighbor elements are taken into account to make the segmentation results spatially smooth. For this purpose, graphical models such as Markov random Field (MRF) and conditional random field (CRF) are usually exploited to encode the spatial relationships. In \cite{munoz2009contextual}, the node potentials and edge potentials are both formulated with a parametric linear model, and the functional max-margin learning is used to find the optimal weights. \cite{lu2012simplified} proposes a simplified Markov network to infer the contextual relations between points. Instead of learning all the weights for the node and edge potentials in graphical models, the node potentials are calculated from a point-wise classifier, and the edge potentials are determined by the physical distance between points. 
+	
+	The performance of the above methods largely depends on handcrafted features. These methods are effective in fixed or regular scenarios, but for dynamic scenes, the features are empirically designed and the performance decreases.
+	
+	\subsection{Deep Learning Methods}
+	Deep learning, especially the convolution neural network (CNN) without handcrafted features, has shown effectual performance on 2D image segmentation\cite{garcia2017review}. However, the semantic segmentation of 3D point clouds(i.e., from LiDAR sensors) is still an open research problem\cite{engelmann2017exploring} due to the irregular, not grid-aligned properties. Therefore, recent studies project the point clouds into 2D views, and some of them attempt to directly ways, for example, volumetric/voxel representations.
+	
+	Inspired by the success of CNN in image segmentation, the state-of-the-art image-based algorithms can be used directly after rendering 2D views from the 3D raw data. \cite{tosteberg2017semantic} projects point clouds into virtual 2D RGB images via Katz projection. Then, a pretrained CNN is used to semantically classify the images. However, this projection removes all the points that are not visible; for example, if a car is projected, all the points behind it are removed. \cite{dewan17iros} unwraps $360^\circ$ 3D LiDAR data onto a spherical 2D plane without point loss. Spherical projection is also applied in SqueezeSeg\cite{wu2017squeezeseg}, where the CNN directly outputs the point-wise label of the transformed LiDAR data and a CRF is applied to refine the outputs. \cite{piewak2018boosting} uses cylindrical projection to create the depth and reflectivity images. In \cite{caltagirone2017fast}, the point clouds are encoded by top-view images and a simple fully convolutional neural network (FCN) is used. This method can be used in real time because only elevation and density features are extracted. In \cite{lawin2017deep}, the input point cloud is projected into multiple views, such as color, depth and surface normal images. 
+	
+	Another type of method models the raw data in direct ways. \cite{tchapmi2017segcloud} proposes SEGCloud, where the raw 3D point cloud is preprocessed into a voxelized point cloud with a fixed grid size. Although \cite{tchapmi2017segcloud} is simple and effective, how to set the voxel size is a problem in large-scale scenes. Thus, the scene is voxelized at five different resolutions in \cite{hackel2017isprs}, and each of the five scales is handled separately by the CNN. Rather than using a fixed grid size, \cite{riegler2017octnet} proposes OctNet, where the hybrid grid-octree data structure is applied to represent the raw 3D data, and each leaf of the octree stores a pooled feature representation. PointNet\cite{qi2017pointnet} is a unified architecture that directly takes raw point clouds as input and outputs the label of each point. The scene is divided into blocks. Then, the points in each block are passed through a series of multilayer perceptrons (MLPs) to extract the local and global features. Based on \cite{qi2017pointnet}, \cite{engelmann2017exploring} extends the method to incorporate a larger-scale spatial context, and improved results are reported in both indoor and outdoor scenarios. \cite{landrieu2017large} proposes a more elegant architecture to capture contextual relations. The first step is to partition the raw point cloud into geometrically simple shapes, called super-points. The super-points are then embedded by PointNet\cite{qi2017pointnet}.
+	
+	Semantic segmentation with deep learning is usually implemented in a supervised manner, which requires detailed annotations. However, obtaining point-wise annotations for 3D point clouds is labor intensive and time consuming. Furthermore, few public datasets support this level of annotation. Our method belongs the former brand where the the raw 3D point clouds is converted into 2D range frame, and FCN is applied .............
 
 \section{Methodology}
 
@@ -219,7 +252,17 @@ Lipschitz-Hankel type involving products of Bessel functions,'' {\em Phil.
 Trans. Roy. Soc. London}, vol. A247, pp. 529--551, April 1955.
 
 
-\end{thebibliography}
+% use section* for acknowledgement
+\section*{Acknowledgment}
+
+The preferred spelling of the word "acknowledgment" in America is without
+an "e" after the "g". Try to avoid the stilted expression, "One of us
+(R.B.G.) thanks ...". Instead, try "R.B.G. thanks ...". Put sponsor
+acknowledgments in the unnumbered footnote on the first page.
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{myref}
 
 
 % that's all folks
