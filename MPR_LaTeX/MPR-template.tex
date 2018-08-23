@@ -25,7 +25,7 @@
 		Wen Yao\authorrefmark{2},
 		Huijing Zhao\authorrefmark{1}}
 \authorblockA{\authorrefmark{1}Peking University, Beijing, China}
-\authorblockA{\authorrefmark{2}201 Institution, Beijing, China}}
+\authorblockA{\authorrefmark{2}China North Vehicle Research Institute, Beijing, China}}
 
 
 % use only for invited papers
@@ -42,11 +42,45 @@ This work studies semantic segmentation of 3D LiDAR data at dynamic urban scenes
 
 \section{Introduction}
 % no \PARstart
-empty
+	Scene understanding is crucial for the safe and efficient navigation of autonomous vehicles in complex and dynamic environments, and semantic segmentation is a key technique. 3D LiDAR has been used as one of the main sensors in many prototyping systems for fully autonomous driving\cite{urmson2008autonomous}. Semantic segmentation using 3D LiDAR data is illustrated in Fig. \ref{fig:dynamiccampus}, where given a frame of input data (a), the problem is to find a meaningful label (i.e., object class in this research) for each pixel, super-pixel or region of the data (b). As 3D LiDAR is a 2.5D sensing of the surroundings, it can be represented equivalently in the form of a range image (c)-(d) in the polar coordinate system, and the problem of semantic segmentation can be solved by using either 3D points or range images as the input.
+	
+	Semantic segmentation using 3D LiDAR data from outdoor scenes has been studied since the past decade \cite{urmson2008autonomous,moosmann2009segmentation,douillard2011segmentation}. The traditional process in these works \cite{munoz2009onboard,zhao2010scene} includes the following steps: (1) preprocessing to divide a whole dataset into locally consistent small units, such as voxels, segments or clusters; (2) extracting a sequence of predefined features; (3) learning a classifier via SVM, random forest etc.; and (4) refining the results using a method such as conditional random field by considering the spatial consistency among neighboring units. On one hand, the criteria of units in preprocessing are empirically defined, for example, the size of voxels[]; one the other hand, the traditional methods depend on carefully designed discriminative features, and their adaptability to different scenes remains an open challenge.
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.5\textwidth]{fig/Fig1.png}
+		\caption{The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and range frame. (b) and (d) show the semantic segmentation results.}
+		\label{fig:dynamiccampus}
+	\end{figure}	
+	
+	The recent success of deep learning in image semantic segmentation has provided new approaches\cite{garcia2017review}. These methods remove the dependence on handcrafted features in an end-to-end manner. Especially, the propose of FCN-based methods\cite{long2015fully} where the semantic segmentation is converted into a pixel-wise classification to reduce the dependence of unit's definition in preprocessing. However, these methods also have substantial demands for finely labeled data\cite{garcia2017review}, and few 3D LiDAR datasets with annotation at the point level to support autonomous driving applications are publicly available. Therefore, the attempts of a point-wise segmentation method for 3D LiDAR data and a fine annotation dataset are necessary.
+	
+	In this paper, we propose a new 3D LiDAR data semantic segmentation method that takes the range frame as input and make a point-wise classification via deep neural network. We evaluate its performance on a new 3D point cloud dataset collected in dynamic urban scenes by our driving platform. The experiments show that our method can recognize more kinds of labels and achieve an impressive result in dynamic urban scenes.
+	
+	The remainder of this paper is organized as follows. Related work is discussed in Sect. \uppercase\expandafter{\romannumeral2}. In Sect. \uppercase\expandafter{\romannumeral3}, the proposed method is presented. Then, we present the experimental results in Sect. \uppercase\expandafter{\romannumeral4} and draw conclusions in Sect. \uppercase\expandafter{\romannumeral5}.
+	
 
 \section{Related works}
-% no \PARstart
-empty
+	\subsection{Feature-based Methods}
+	Feature-based methods belong to traditional machine learning, and the general process of these methods consists of feature selection, classifier design and graphical model description.
+	
+	A straightforward technique is to convert semantic segmentation into a point-wise classification that includes extracting the features on each unit, concatenating the features as a vector and determining the label via a well-trained classifier. \cite{weinmann2014semantic} presents a common pipeline from feature selection to classifier training. Due to the irregular arrangement of point clouds, the authors test 5 definitions of neighborhood to achieve the best representation. Similar research is conducted in \cite{hackel2016fast}, which demonstrates the ability to address varying densities of data. A single point cloud usually contains millions of points, so evaluating the label for each point is typically computationally expensive (on the order of minutes according to \cite{hackel2016fast}). 
+	
+	\cite{hu2013efficient} proposes an efficient approach where speed and accuracy are satisfied simultaneously; furthermore, the average classification time can be reduced to less than 1 s. \cite{zhao2010scene} represents the raw point cloud as a 2D range image and proposes a framework for simultaneous segmentation and classification of the range image that considers both the 2D range image and 3D raw data. Straightforward approaches assume that each data unit is independent and ignore the spatial and contextual relations between units. Consequently, they can produce good results based on distinctive features. However, when the features are not discriminative, the point-wise classification will be noisy and locally inconsistent\cite{munoz2009onboard}.
+	
+	The neighbor elements are taken into account to make the segmentation results spatially smooth. For this purpose, graphical models such as Markov random Field (MRF) and conditional random field (CRF) are usually exploited to encode the spatial relationships. In \cite{munoz2009contextual}, the node potentials and edge potentials are both formulated with a parametric linear model, and the functional max-margin learning is used to find the optimal weights. \cite{lu2012simplified} proposes a simplified Markov network to infer the contextual relations between points. Instead of learning all the weights for the node and edge potentials in graphical models, the node potentials are calculated from a point-wise classifier, and the edge potentials are determined by the physical distance between points. 
+	
+	The performance of the above methods largely depends on handcrafted features. These methods are effective in fixed or regular scenarios, but for dynamic scenes, the features are empirically designed and the performance decreases.
+	
+	\subsection{Deep Learning Methods}
+	Deep learning, especially the convolution neural network (CNN) without handcrafted features, has shown effectual performance on 2D image segmentation\cite{garcia2017review}. However, the semantic segmentation of 3D point clouds(i.e., from LiDAR sensors) is still an open research problem\cite{engelmann2017exploring} due to the irregular, not grid-aligned properties. Therefore, recent studies project the point clouds into 2D views, and some of them attempt to directly ways, for example, volumetric/voxel representations.
+	
+	Inspired by the success of CNN in image segmentation, the state-of-the-art image-based algorithms can be used directly after rendering 2D views from the 3D raw data. \cite{tosteberg2017semantic} projects point clouds into virtual 2D RGB images via Katz projection. Then, a pretrained CNN is used to semantically classify the images. However, this projection removes all the points that are not visible; for example, if a car is projected, all the points behind it are removed. \cite{dewan17iros} unwraps $360^\circ$ 3D LiDAR data onto a spherical 2D plane without point loss. Spherical projection is also applied in SqueezeSeg\cite{wu2017squeezeseg}, where the CNN directly outputs the point-wise label of the transformed LiDAR data and a CRF is applied to refine the outputs. \cite{piewak2018boosting} uses cylindrical projection to create the depth and reflectivity images. In \cite{caltagirone2017fast}, the point clouds are encoded by top-view images and a simple fully convolutional neural network (FCN) is used. This method can be used in real time because only elevation and density features are extracted. In \cite{lawin2017deep}, the input point cloud is projected into multiple views, such as color, depth and surface normal images. 
+	
+	Another type of method models the raw data in direct ways. \cite{tchapmi2017segcloud} proposes SEGCloud, where the raw 3D point cloud is preprocessed into a voxelized point cloud with a fixed grid size. Although \cite{tchapmi2017segcloud} is simple and effective, how to set the voxel size is a problem in large-scale scenes. Thus, the scene is voxelized at five different resolutions in \cite{hackel2017isprs}, and each of the five scales is handled separately by the CNN. Rather than using a fixed grid size, \cite{riegler2017octnet} proposes OctNet, where the hybrid grid-octree data structure is applied to represent the raw 3D data, and each leaf of the octree stores a pooled feature representation. PointNet\cite{qi2017pointnet} is a unified architecture that directly takes raw point clouds as input and outputs the label of each point. The scene is divided into blocks. Then, the points in each block are passed through a series of multilayer perceptrons (MLPs) to extract the local and global features. Based on \cite{qi2017pointnet}, \cite{engelmann2017exploring} extends the method to incorporate a larger-scale spatial context, and improved results are reported in both indoor and outdoor scenarios. \cite{landrieu2017large} proposes a more elegant architecture to capture contextual relations. The first step is to partition the raw point cloud into geometrically simple shapes, called super-points. The super-points are then embedded by PointNet\cite{qi2017pointnet}.
+	
+	Our method belongs the former brand where the the raw 3D point clouds is converted into 2D range frame,  
+	Semantic segmentation with deep learning is usually implemented in a supervised manner, which requires detailed annotations. However, obtaining point-wise annotations for 3D point clouds is labor intensive and time consuming. Furthermore, few public datasets support this level of annotation.  
 
 \section{Methodology}
 
@@ -144,319 +178,19 @@ The qualitative results are shown in Fig. We use mPA (mean pixel accuracy) for q
 mPA = \dfrac{1}{K}*\sum_{k=1}^{K}\dfrac{\left| \dot{Y}_k \cap Y_k \right|}{\left| \dot{Y}_k\right|}
 \end{equation}
 
-\subsection{Preparing your Electronic Paper}
 
-{\em Type sizes and typefaces}: Follow the type sizes specified in
-Table~\ref{table1}. As an aid in gauging type size, 1 point is
-about 0.35~mm. The size of the lowercase letter ``j'' will give
-the point size. Times New Roman is the preferred font.
-
-{\em 1) US Letter Margins}:  top = 0.75 inches, bottom = 1 inch, side = 0.625 inches. 
-Each column measures 3.5 inches wide, with a 0.25-inch measurement between columns.
-
-{\em 2) A4 Margins}: top = 19mm, bottom = 43mm, side = 13 mm. The A4 column width is 
-88mm (3.45 in). The space between the two columns is 4mm (0.17 in). Paragraph indentation 
-is 3.5 mm (0.14 in).
-
-\begin{table}[hb]
-\begin{center} \caption{Type Sizes for Papers}
-\label{table1}
-\renewcommand{\arraystretch}{1.3}
-\begin{tabular}{|c|p{34mm}|c|c|}
- \hline
-Type & \multicolumn{3}{c|}{Appearance} \\
-size &\multicolumn{3}{c|}{~} \\ \cline{2-4} (pts.) & Regular &
-Bold & Italic \\ \hline
- 6 & Table captions\footnotemark[1], table superscripts & & \\ \hline
- 8 & Section titles\footnotemark[1], references, tables, table
- names\footnotemark[1],
- first letters in table captions\footnotemark[1], figure captions, footnotes,
- text subscripts, and superscripts &
-& \\ \hline
- 9 & & Abstract & \\ \hline
- 10 & Authors' affiliations, main text, equations, first letters in
- section titles\footnotemark[1] & & Subheading \\ \hline
- 11 & Authors' names & & \\ \hline
- 24 & Paper title & & \\ \hline
-\end{tabular}
-\end{center}
-\end{table}
-\footnotetext[1]{Uppercase    ( {\bf It is recommended that footnotes be avoided. Instead, try to integrate the footnote information into the text.} )}
-
-The column width is 82~mm (3.23 in). The space between the two columns is
-6~mm (0.24 in). Paragraph indentation is 3.5 mm (0.14 in).
-
-Left- and right-justify your columns. Use tables and figures to
-adjust column length. On the last page of your paper, adjust the
-lengths of the columns so that they are equal. Use automatic
-hyphenation and check spelling.
-
-
-\section{Helpful Hints}
-
-\subsection{Figures and Tables - Subsection Example}
-
-Position figures and tables at the tops and bottoms of columns. Avoid
-placing them in the middle of columns. Large figures and tables may span
-across both columns. Figure captions should be centered below the figures;
-table captions should be centered above. Avoid placing figures and tables
-before their first mention in the text. Use the abbreviation ``Fig. 1'',
-even at the beginning of a sentence.
-
-\subsubsection{Sub-subsection example}
-Figure axis labels are often a source of confusion. Use words rather than
-symbols. For example, write ``Magnetization'', or ``Magnetization, M'',
-not just ``M.''  Put units in parentheses. Do not label axes only with
-units. In the example, write ``Magnetization (A/m)'' or ``Magnetization (A
-$\cdot$ m$^{-1}$).'' Do not label axes with a ratio of quantities and
-units. For example, write ``Temperature (K)'', not ``Temperature/K.''
-
-Multipliers can be especially confusing. Write ``Magnetization (kA/m)'' or
-``Magnetization ($10^{3}$ A/m)''. Figure labels should be legible, about
-10-point type.
-
-
-\subsection{References}
-
-Number citations consecutively in square brackets \cite{eason}.
-Punctuation follows the bracket \cite{maxwell}. Refer simply to the
-reference number, as in \cite{jacobs}. Use ``Ref. \cite{jacobs}'' or
-``Reference \cite{jacobs}'' at the beginning of a sentence: ``Reference
-\cite{jacobs} was the first ...''
-
-Number footnotes separately in superscripts. Place the actual footnote at
-the bottom of the column in which it was cited. Do not put footnotes in
-the reference list. Use letters for table footnotes (see Table 1). IEEE
-Transactions no longer use a journal prefix before the volume number. For
-example, use ``IEEE Trans. Magn., vol. 25'', not ``vol. MAG-25''.
-
-Give all authors' names; use ``et al.'' if there are six authors or more.
-Papers that have not been published, even if they have been submitted for
-publication, should be cited as "unpublished" \cite{elissa}. Papers that
-have been accepted for publication should be cited as ``in press''
-\cite{nicole}. In a paper title, capitalize the first word and all other
-words except for conjunctions, prepositions less than seven letters, and
-prepositional phrases.
-
-\begin{figure}[t]
- \centering
-% \includegraphics[scale=0.95] {fig1}
-\caption{Magnetization as a function of applied field.} \label{figure1}
-\end{figure}
-
-For papers published in translated journals, first give the English
-citation, then the original foreign-language citation \cite{yorozu}.
-
-
-\subsection{Abbreviations and Acronyms}
-
-Define abbreviations and acronyms the first time they are used in the
-text, even after they have been defined in the abstract. Abbreviations
-such as IEEE, SI, MKS, CGS, sc, dc, and rms do not have to be defined. Do
-not use abbreviations in the title unless they are unavoidable.
-
-\subsection{Equations}
-
-Number equations consecutively with equation numbers in
-parentheses flush with the right margin, as in (\ref{eq1}). To
-make your equations more compact, you may use the solidus (/), the
-exp function, or appropriate exponents. Italicize Roman symbols
-for quantities and variables, but not Greek symbols. Use an en
-dash (-) rather than a hyphen for a minus sign. Use parentheses to
-avoid ambiguities in denominators. Punctuate equations with commas
-or periods when they are part of a sentence, as in
-\begin{equation}
- z = \sin^2 x + \cos^2 y.  \label{eq1}
-\end{equation}
-Symbols in your equation should be defined before the equation
-appears or immediately following. Use ``(\ref{eq1}),'' not
-``Eq.~(\ref{eq1})'' or ``equation~(\ref{eq1}),'' except at the
-beginning of a sentence: ``Equation~(\ref{eq1}) is ...''
-
-
-\subsection{Other Recommendations}
-
-The Roman numerals used to number the section headings are
-optional. If you do use them, do not number ACKNOWLEDGMENTS and
-REFERENCES, and begin Subheadings with letters. Use two spaces
-after periods (full stops). Hyphenate complex modifiers:
-``zero-field-cooled magnetization.'' Avoid dangling participles,
-such as, ``Using (\ref{eq1}), the potential was calculated.''
-Write instead, ``The potential was calculated using (\ref{eq1}),''
-or ``Using  (\ref{eq1}), we calculated the potential.''
-
-Use a zero before decimal points: ``0.25'', not ``.25''. Use ``cm$^{3}$''
-not ``cc''. Do not mix complete spellings and abbreviations of units:
-``Wb/m$^{2}$'' or ``webers per square meter,'' not ``webers/m$^{2}$''.
-Spell units when they appear in text: ``...a few henries'', not ``...a few
-H.'' If your native language is not English, try to get a native
-English-speaking colleague to proofread your paper. Do not add page
-numbers.
-
-\section{Units}
-
-Use either SI (MKS) or CGS as primary units. (SI units are encouraged.)
-English units may be used as secondary units (in parentheses). An
-exception would be the use of English units as identifiers in trade, such
-as ``3.5-inch disk drive.''
-
-Avoid combining SI and CGS units, such as current in amperes and magnetic
-field in oersteds. This often leads to confusion because equations do not
-balance dimensionally.
-
-
-\section{Some Common Mistakes}
-
-The word ``data'' is plural, not singular. The subscript for the
-permeability of vacuum is zero, not a lowercase letter ``o''. In American
-English, periods and commas are within quotation marks, like ``this
-period''. A parenthetical statement at the end of a sentence is punctuated
-outside of the closing parenthesis (like this). (A parenthetical sentence
-is punctuated within the parentheses.) A graph within a graph is an
-``inset'', not an ``insert''. The word alternatively is preferred to the
-word ``alternately'' (unless you mean something that alternates). Do not
-use the word ``essentially'' to mean ``approximately'' or ``effectively.''
-Be aware of the different meanings of the homophones  ``affect'' and
-``effect,'' ``complement'' and ``compliment,'' ``discreet'' and
-``discrete,'' ``principal'' and ``principle.'' Do not confuse ``imply''
-and ``infer.'' The prefix ``non'' is not a word; it should be joined to
-the word it modifies, usually without a hyphen. There is no period after
-the ``et'' in the Latin abbreviation ``et al.'' The abbreviation ``i.e.''
-means ``that is,'' and the abbreviation ``e.g.'' means ``for example.'' An
-excellent style manual for science writers is \cite{young}.
-
-
-
-% Reminder: the "draftcls" or "draftclsnofoot", not "draft", class option
-% should be used if it is desired that the figures are to be displayed while
-% in draft mode.
-
-% An example of a floating figure using the graphicx package.
-% Note that \label must occur AFTER (or within) \caption.
-% For figures, \caption should occur after the \includegraphics.
-%
-%\begin{figure}
-%\centering
-%\includegraphics[width=2.5in]{myfigure}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex
-%\caption{Simulation Results}
-%\label{fig_sim}
-%\end{figure}
-
-
-% An example of a double column floating figure using two subfigures.
-%(The subfigure.sty package must be loaded for this to work.)
-% The subfigure \label commands are set within each subfigure command, the
-% \label for the overall fgure must come after \caption.
-% \hfil must be used as a separator to get equal spacing
-%
-%\begin{figure*}
-%\centerline{\subfigure[Case I]{\includegraphics[width=2.5in]{subfigcase1}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex
-%\label{fig_first_case}}
-%\hfil
-%\subfigure[Case II]{\includegraphics[width=2.5in]{subfigcase2}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex
-%\label{fig_second_case}}}
-%\caption{Simulation results}
-%\label{fig_sim}
-%\end{figure*}
-
-
-
-% An example of a floating table. Note that, for IEEE style tables, the 
-% \caption command should come BEFORE the table. Table text will default to
-% \footnotesize as IEEE normally uses this smaller font for tables.
-% The \label must come after \caption as always.
-%
-%\begin{table}
-%% increase table row spacing, adjust to taste
-%\renewcommand{\arraystretch}{1.3}
-%\caption{An Example of a Table}
-%\label{table_example}
-%\begin{center}
-%% Some packages, such as MDW tools, offer better commands for making tables
-%% than the plain LaTeX2e tabular which is used here.
-%\begin{tabular}{|c||c|}
-%\hline
-%One & Two\\
-%\hline
-%Three & Four\\
-%\hline
-%\end{tabular}
-%\end{center}
-%\end{table}
-
-
-%\section{Conclusion}
-%The conclusion goes here.
-
-% conference papers do not normally have an appendix
 
 % use section* for acknowledgement
 \section*{Acknowledgment}
-% optional entry into table of contents (if used)
-%\addcontentsline{toc}{section}{Acknowledgment}
 
 The preferred spelling of the word "acknowledgment" in America is without
 an "e" after the "g". Try to avoid the stilted expression, "One of us
 (R.B.G.) thanks ...". Instead, try "R.B.G. thanks ...". Put sponsor
 acknowledgments in the unnumbered footnote on the first page.
 
-% trigger a \newpage just before the given reference
-% number - used to balance the columns on the last page
-% adjust value as needed - may need to be readjusted if
-% the document is modified later
-%\IEEEtriggeratref{8}
-% The "triggered" command can be changed if desired:
-%\IEEEtriggercmd{\enlargethispage{-5in}}
 
-% references section
-% NOTE: BibTeX documentation can be easily obtained at:
-% http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
-
-% can use a bibliography generated by BibTeX as a .bbl file
-% standard IEEE bibliography style from:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/supported/IEEEtran/testflow/bibtex
-%\bibliographystyle{IEEEtran.bst}
-% argument is your BibTeX string definitions and bibliography database(s)
-%\bibliography{IEEEabrv,../bib/paper}
-%
-% <OR> manually copy in the resultant .bbl file
-% set second argument of \begin to the number of references
-% (used to reserve space for the reference number labels box)
-
-\begin{thebibliography}{10}
-
-\bibitem{eason} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of
-Lipschitz-Hankel type involving products of Bessel functions,'' {\em Phil.
-Trans. Roy. Soc. London}, vol. A247, pp. 529--551, April 1955.
-
-\bibitem{maxwell} J. Clerk Maxwell, {\em A Treatise on Electricity and Magnetism}, 3rd ed.,
-vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-
-\bibitem{jacobs} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange
-anisotropy,'' in {\em Magnetism}, vol. III, G. T. Rado and H. Suhl, Eds.
-New York: Academic, 1963, pp. 271--350.
-
-\bibitem{elissa} K. Elissa, ``Title of paper if known,'' unpublished.
-
-\bibitem{nicole} R. Nicole, ``Title of paper with only first word capitalized'',
-{\em J. Name Stand. Abbrev.}, in press.
-
-\bibitem{yorozu} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy
-studies on magneto-optical media and plastic substrate interface,'' {\em
-IEEE Transl. J. Magn. Japan}, vol. 2, pp. 740--741, August 1987 [Digests
-9th Annual Conf. Magnetics Japan, p. 301, 1982].
-
-\bibitem{young} M. Young, {\em The Technical Writer's Handbook}. Mill Valley, CA: University
-Science, 1989.
-
-
-\end{thebibliography}
+\bibliographystyle{IEEEtran}
+\bibliography{myref}
 
 
 % that's all folks
