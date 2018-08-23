@@ -51,6 +51,12 @@ H.~Zhao, Y.~Liu, X.~Zhu, Y.~Zhao, and H.~Zha, ``Scene understanding in a large
   International Conference on Robotics and Automation}.\hskip 1em plus 0.5em
   minus 0.4em\relax IEEE, 2010, pp. 127--133.
 
+\bibitem{hackel2017isprs}
+T.~Hackel, N.~Savinov, L.~Ladicky, J.~D. Wegner, K.~Schindler, and
+  M.~Pollefeys, ``{SEMANTIC3D.NET: A new large-scale point cloud classification
+  benchmark},'' \emph{ISPRS Annals of the Photogrammetry, Remote Sensing and
+  Spatial Information Sciences}, vol. IV-1-W1, pp. 91--98, 2017.
+
 \bibitem{garcia2017review}
 A.~Garcia-Garcia, S.~Orts-Escolano, S.~Oprea, V.~Villena-Martinez, and
   J.~Garcia-Rodriguez, ``A review on deep learning techniques applied to
@@ -133,12 +139,6 @@ F.~J. Lawin, M.~Danelljan, P.~Tosteberg, G.~Bhat, F.~S. Khan, and M.~Felsberg,
 L.~P. Tchapmi, C.~B. Choy, I.~Armeni, J.~Gwak, and S.~Savarese, ``Segcloud:
   Semantic segmentation of 3d point clouds,'' \emph{arXiv preprint
   arXiv:1710.07563}, 2017.
-
-\bibitem{hackel2017isprs}
-T.~Hackel, N.~Savinov, L.~Ladicky, J.~D. Wegner, K.~Schindler, and
-  M.~Pollefeys, ``{SEMANTIC3D.NET: A new large-scale point cloud classification
-  benchmark},'' \emph{ISPRS Annals of the Photogrammetry, Remote Sensing and
-  Spatial Information Sciences}, vol. IV-1-W1, pp. 91--98, 2017.
 
 \bibitem{riegler2017octnet}
 G.~Riegler, A.~O. Ulusoy, and A.~Geiger, ``Octnet: Learning deep 3d
