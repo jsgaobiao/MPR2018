@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2018.7.31)  23 AUG 2018 21:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2018.7.31)  23 AUG 2018 22:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -330,37 +330,6 @@ Package caption Info: subfigure package is loaded.
 Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Calculating math sizes for size <11> on input line 34.
 
-
-LaTeX Warning: Citation `urmson2008autonomous' on page 1 undefined on input lin
-e 44.
-
-
-LaTeX Warning: Reference `fig:dynamiccampus' on page 1 undefined on input line 
-44.
-
-
-LaTeX Warning: Citation `urmson2008autonomous' on page 1 undefined on input lin
-e 46.
-
-
-LaTeX Warning: Citation `moosmann2009segmentation' on page 1 undefined on input
- line 46.
-
-
-LaTeX Warning: Citation `douillard2011segmentation' on page 1 undefined on inpu
-t line 46.
-
-
-LaTeX Warning: Citation `munoz2009onboard' on page 1 undefined on input line 46
-.
-
-
-LaTeX Warning: Citation `zhao2010scene' on page 1 undefined on input line 46.
-
-
-LaTeX Warning: Citation `hackel2017isprs' on page 1 undefined on input line 46.
-
-
 <fig/Fig1.png, id=1, 456.2646pt x 339.1872pt>
 File: fig/Fig1.png Graphic file (type png)
  <use fig/Fig1.png>
@@ -372,84 +341,103 @@ Overfull \hbox (5.69055pt too wide) in paragraph at lines 50--51
  []
 
 
-LaTeX Warning: Citation `garcia2017review' on page 1 undefined on input line 55
-.
-
-
-LaTeX Warning: Citation `long2015fully' on page 1 undefined on input line 55.
-
-
-LaTeX Warning: Citation `garcia2017review' on page 1 undefined on input line 55
-.
-
-
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [1{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}
 
 
- <./fig/Fig1.png>]
+ <./fig/Fig1.png>] [2]
+<fig/collect_route.png, id=19, 655.7298pt x 322.3242pt>
+File: fig/collect_route.png Graphic file (type png)
 
-LaTeX Warning: Citation `weinmann2014semantic' on page 2 undefined on input lin
-e 66.
+<use fig/collect_route.png>
+Package pdftex.def Info: fig/collect_route.png used on input line 141.
+(pdftex.def)             Requested size: 256.0748pt x 125.87315pt.
+ [3 <./fig/collect_route.png>]
 
-
-LaTeX Warning: Citation `hackel2016fast' on page 2 undefined on input line 66.
-
-
-LaTeX Warning: Citation `hackel2016fast' on page 2 undefined on input line 66.
-
-
-LaTeX Warning: Citation `hu2013efficient' on page 2 undefined on input line 68.
-
-
-
-LaTeX Warning: Citation `zhao2010scene' on page 2 undefined on input line 68.
-
-
-LaTeX Warning: Citation `munoz2009onboard' on page 2 undefined on input line 68
-.
+pdfTeX warning: /usr/bin/pdflatex (file ./fig/1.pdf): PDF inclusion: found PDF 
+version <1.7>, but at most version <1.5> allowed
+<fig/1.pdf, id=29, 963.72044pt x 449.5194pt>
+File: fig/1.pdf Graphic file (type pdf)
+ <use fig/1.pdf>
+Package pdftex.def Info: fig/1.pdf used on input line 204.
+(pdftex.def)             Requested size: 471.17442pt x 219.77942pt.
 
 
-LaTeX Warning: Citation `munoz2009contextual' on page 2 undefined on input line
- 70.
+pdfTeX warning: /usr/bin/pdflatex (file ./fig/2.pdf): PDF inclusion: found PDF 
+version <1.7>, but at most version <1.5> allowed
+<fig/2.pdf, id=30, 963.72044pt x 391.4625pt>
+File: fig/2.pdf Graphic file (type pdf)
+ <use fig/2.pdf>
+Package pdftex.def Info: fig/2.pdf used on input line 208.
+(pdftex.def)             Requested size: 471.17442pt x 191.3942pt.
 
 
-LaTeX Warning: Citation `lu2012simplified' on page 2 undefined on input line 70
-.
+pdfTeX warning: /usr/bin/pdflatex (file ./fig/result_3channel_3.pdf): PDF inclu
+sion: found PDF version <1.7>, but at most version <1.5> allowed
+<fig/result_3channel_3.pdf, id=31, 690.78076pt x 680.3016pt>
+File: fig/result_3channel_3.pdf Graphic file (type pdf)
+
+<use fig/result_3channel_3.pdf>
+Package pdftex.def Info: fig/result_3channel_3.pdf used on input line 218.
+(pdftex.def)             Requested size: 183.23894pt x 180.45554pt.
 
 
-LaTeX Warning: Citation `garcia2017review' on page 2 undefined on input line 75
-.
+pdfTeX warning: /usr/bin/pdflatex (file ./fig/result_newweight_lr5.pdf): PDF in
+clusion: found PDF version <1.7>, but at most version <1.5> allowed
+<fig/result_newweight_lr5.pdf, id=32, 690.78076pt x 680.3016pt>
+File: fig/result_newweight_lr5.pdf Graphic file (type pdf)
 
+<use fig/result_newweight_lr5.pdf>
+Package pdftex.def Info: fig/result_newweight_lr5.pdf used on input line 223.
+(pdftex.def)             Requested size: 183.23894pt x 180.45554pt.
+ (./MPR-template.bbl [4] [5 <./fig/1.pdf> <./fig/2.pdf
 
-LaTeX Warning: Citation `engelmann2017exploring' on page 2 undefined on input l
-ine 75.
+pdfTeX warning: /usr/bin/pdflatex (file ./fig/2.pdf): PDF inclusion: multiple p
+dfs with page group included in a single page
+>])
 
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
 
-LaTeX Warning: Citation `tosteberg2017semantic' on page 2 undefined on input li
-ne 77.
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper. In case of CD-ROM proceedings this is not
+ a must-have feature. However, it is recommended to do so, because
+ it simply looks better.
 
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the A4 (210mm X 297mm, 8.27in X 11.69in) paper size.
 
-LaTeX Warning: Citation `dewan17iros' on page 2 undefined on input line 77.
+[6 <./fig/result_3channel_3.pdf> <./fig/result_newweight_lr5.pdf
 
-
-LaTeX Warning: Citation `wu2017squeezeseg' on page 2 undefined on input line 77
-.
-
-
-LaTeX Warning: Citation `piewak2018boosting' on page 2 undefined on input line 
-77.
-
-
-LaTeX Warning: Citation `caltagirone2017fast' on page 2 undefined on input line
- 77.
-
-
-LaTeX Warning: Citation `lawin2017deep' on page 2 undefined on input line 77.
-
-
-LaTeX Warning: Citation `tchapmi2017segcloud' on page 2 undefined on input line
- 79.
-
+pdfTeX warning: /usr/bin/pdflatex (file ./fig/result_newweight_lr5.pdf): PDF in
+clusion: multiple pdfs with page group included in a single page
+>] (./MPR-template.aux) ) 
+Here is how much of TeX's memory you used:
+ 4117 strings out of 493029
+ 63644 string characters out of 6136234
+ 139075 words of memory out of 5000000
+ 7596 multiletter control sequences out of 15000+600000
+ 41186 words of font info for 85 fonts, out of 8000000 for 9000
+ 1145 hyphenation exceptions out of 8191
+ 38i,32n,39p,1527b,347s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/share/texlive/texmf-dist/fonts/enc/dvips/base/8r
+.enc}</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
+/usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/s
+hare/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/t
+exmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texlive/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/font
+s/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmsy8.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/ti
+mes/utmb8a.pfb></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb
+></usr/share/texlive/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/te
+xlive/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on MPR-template.pdf (6 pages, 2635859 bytes).
+PDF statistics:
+ 155 PDF objects out of 1000 (max. 8388607)
+ 85 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 31 words of extra memory for PDF output out of 10000 (max. 10000000)
 
