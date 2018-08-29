@@ -1,4 +1,21 @@
 \relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
 \citation{urmson2008autonomous}
 \citation{urmson2008autonomous}
 \citation{moosmann2009segmentation}
@@ -9,10 +26,9 @@
 \citation{garcia2017review}
 \citation{long2015fully}
 \citation{garcia2017review}
-\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and range frame. (b) and (d) show the semantic segmentation results.\relax }}{1}}
-\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
-\newlabel{fig:dynamiccampus}{{1}{1}}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and input frame with 3 channels (range/intensity/height). (b) and (d) show the semantic segmentation results.}}{1}{figure.1}}
+\newlabel{fig:dynamiccampus}{{1}{1}{The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and input frame with 3 channels (range/intensity/height). (b) and (d) show the semantic segmentation results}{figure.1}{}}
 \citation{weinmann2014semantic}
 \citation{hackel2016fast}
 \citation{hackel2016fast}
@@ -38,21 +54,51 @@
 \citation{engelmann2017exploring}
 \citation{landrieu2017large}
 \citation{qi2017pointnet}
-\@writefile{toc}{\contentsline {section}{\numberline {II}Related works}{2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {II-A}Feature-based Methods}{2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {II-B}Deep Learning Methods}{2}}
-\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology}{2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {III-A}Data Preprocessing}{2}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {III-B}Problem Definition}{3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {III-C}Network Architecture and Loss Function}{3}}
-\@writefile{toc}{\contentsline {section}{\numberline {IV}Experiment}{3}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {IV-A}Data Set}{3}}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The routes of data collection and the platform configuration.\relax }}{3}}
-\newlabel{fig:collect_route}{{2}{3}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Related works}{2}{section.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {II-A}Feature-based Methods}{2}{subsection.2.1}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {II-B}Deep Learning Methods}{2}{subsection.2.2}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology}{2}{section.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-A}Data Preprocessing}{2}{subsection.3.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The framework of our proposed method, which combines a fully convolutional network with spatial constraints.}}{3}{figure.2}}
+\newlabel{fig:network}{{2}{3}{The framework of our proposed method, which combines a fully convolutional network with spatial constraints}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-B}Problem Definition}{3}{subsection.3.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-C}Network Architecture and Loss Function}{3}{subsection.3.3}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {III-D}Spatial Constraint}{4}{subsection.3.4}}
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Experiment}{4}{section.4}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {IV-A}Data Set}{4}{subsection.4.1}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces The routes of data collection and the platform configuration.}}{4}{figure.3}}
+\newlabel{fig:collect_route}{{3}{4}{The routes of data collection and the platform configuration}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {IV-B}Setup}{4}{subsection.4.2}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {IV-C}Results Evaluation}{4}{subsection.4.3}}
+\newlabel{fig:result_1_a}{{4(a)}{5}{Subfigure 4(a)}{subfigure.4.1}{}}
+\newlabel{sub@fig:result_1_a}{{(a)}{5}{Subfigure 4(a)\relax }{subfigure.4.1}{}}
+\newlabel{fig:result_1_b}{{4(b)}{5}{Subfigure 4(b)}{subfigure.4.2}{}}
+\newlabel{sub@fig:result_1_b}{{(b)}{5}{Subfigure 4(b)\relax }{subfigure.4.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Visualization result of semantic segmentation.}}{5}{figure.4}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Weighted loss leads to better performance of labels with less samples, such as the traffic sign in Box A. And spatial constraint makes semantic segmentation more locally consistent, like the cyclist in Box B.}}}{5}{figure.4}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Box C shows the improvement of a traffic sign's label result by weighted loss. Box D,E are good examples reflecting the benifit of the spatial constraints, which makes pixel labels belonging to one person more uniform.}}}{5}{figure.4}}
+\newlabel{fig:result_1}{{4}{5}{Visualization result of semantic segmentation}{figure.4}{}}
 \bibstyle{IEEEtran}
 \bibdata{myref}
 \bibcite{urmson2008autonomous}{1}
 \bibcite{moosmann2009segmentation}{2}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Categories Distribution in Dataset}}{6}{table.1}}
+\newlabel{category_distribution}{{I}{6}{Categories Distribution in Dataset}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces semantic segmentation performance (mPA)}}{6}{table.2}}
+\newlabel{performance}{{II}{6}{semantic segmentation performance (mPA)}{table.2}{}}
+\newlabel{fig:matrix1}{{5(a)}{6}{Subfigure 5(a)}{subfigure.5.1}{}}
+\newlabel{sub@fig:matrix1}{{(a)}{6}{Subfigure 5(a)\relax }{subfigure.5.1}{}}
+\newlabel{fig:matrix2}{{5(b)}{6}{Subfigure 5(b)}{subfigure.5.2}{}}
+\newlabel{sub@fig:matrix2}{{(b)}{6}{Subfigure 5(b)\relax }{subfigure.5.2}{}}
+\newlabel{fig:matrix3}{{5(c)}{6}{Subfigure 5(c)}{subfigure.5.3}{}}
+\newlabel{sub@fig:matrix3}{{(c)}{6}{Subfigure 5(c)\relax }{subfigure.5.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces  The confusion matrix on testing dataset, values are shown in percentage. Rows means ground truth labels and columns means predicted labels. }}{6}{figure.5}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Confusion matrix of baseline model}}}{6}{figure.5}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Confustion matrix of weighted loss model}}}{6}{figure.5}}
+\@writefile{lof}{\contentsline {subfigure}{\numberline{(c)}{\ignorespaces {Confustion matrix of our proposed model}}}{6}{figure.5}}
+\newlabel{fig:matrix}{{5}{6}{The confusion matrix on testing dataset, values are shown in percentage. Rows means ground truth labels and columns means predicted labels}{figure.5}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{6}{section.5}}
+\@writefile{toc}{\contentsline {section}{References}{6}{section*.1}}
 \bibcite{douillard2011segmentation}{3}
 \bibcite{munoz2009onboard}{4}
 \bibcite{zhao2010scene}{5}
@@ -61,22 +107,6 @@
 \bibcite{long2015fully}{8}
 \bibcite{weinmann2014semantic}{9}
 \bibcite{hackel2016fast}{10}
-\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Categories Distribution in Dataset\relax }}{4}}
-\newlabel{category_distribution}{{I}{4}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {IV-B}Setup}{4}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {IV-C}Results Evaluation}{4}}
-\@writefile{toc}{\contentsline {section}{\numberline {V}Conclusion}{4}}
-\@writefile{toc}{\contentsline {section}{References}{4}}
-\@writefile{lot}{\contentsline {table}{\numberline {II}{\ignorespaces semantic segmentation performance (mPA)\relax }}{5}}
-\newlabel{performance}{{II}{5}}
-\newlabel{fig:result_1_a}{{3(a)}{5}}
-\newlabel{sub@fig:result_1_a}{{(a)}{5}}
-\newlabel{fig:result_1_b}{{3(b)}{5}}
-\newlabel{sub@fig:result_1_b}{{(b)}{5}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Visualization result of semantic segmentation.\relax }}{5}}
-\newlabel{fig:result_1}{{3}{5}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Weighted loss leads to better performance of labels with less samples, such as the traffic sign in Box A.}}}{5}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Weighted loss version segmentation model can achieve more balanced result than the baseline. For example, Box B shows the improvement of a traffic sign's label result, and Box C,D include the results improvement of pedestrain.}}}{5}}
 \bibcite{hu2013efficient}{11}
 \bibcite{munoz2009contextual}{12}
 \bibcite{lu2012simplified}{13}
@@ -91,11 +121,3 @@
 \bibcite{riegler2017octnet}{22}
 \bibcite{qi2017pointnet}{23}
 \bibcite{landrieu2017large}{24}
-\newlabel{fig:matrix1}{{4(a)}{6}}
-\newlabel{sub@fig:matrix1}{{(a)}{6}}
-\newlabel{fig:matrix2}{{4(b)}{6}}
-\newlabel{sub@fig:matrix2}{{(b)}{6}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces  The confusion matrix on testing dataset, values in matrices are shown in percentage. \\ Rows means ground truth labels and columns means predicted labels. \relax }}{6}}
-\newlabel{fig:matrix}{{4}{6}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(a)}{\ignorespaces {Confusion matrix of baseline model}}}{6}}
-\@writefile{lof}{\contentsline {subfigure}{\numberline{(b)}{\ignorespaces {Confustion matrix of weighted loss model}}}{6}}

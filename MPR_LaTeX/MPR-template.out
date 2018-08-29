@@ -1,0 +1,15 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Related works}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Feature-based Methods}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Deep Learning Methods}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Methodology}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Data Preprocessing}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.2}{Problem Definition}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.3}{Network Architecture and Loss Function}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.4}{Spatial Constraint}{section.3}% 9
+\BOOKMARK [1][-]{section.4}{Experiment}{}% 10
+\BOOKMARK [2][-]{subsection.4.1}{Data Set}{section.4}% 11
+\BOOKMARK [2][-]{subsection.4.2}{Setup}{section.4}% 12
+\BOOKMARK [2][-]{subsection.4.3}{Results Evaluation}{section.4}% 13
+\BOOKMARK [1][-]{section.5}{Conclusion}{}% 14
+\BOOKMARK [1][-]{section*.1}{References}{}% 15

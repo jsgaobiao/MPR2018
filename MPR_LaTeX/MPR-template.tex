@@ -7,244 +7,272 @@
 \input{MPR-head.tex}
 
 \begin{document}
+
+% paper title
+\title{Semantic Segmentation of 3D LiDAR Data at Dynamic Urban Scenes}
+
+
+% avoiding spaces at the end of the author lines is not a problem with
+% conference papers because we don't use \thanks or \IEEEmembership
+
+
+\author{\authorblockN
+	{Biao Gao\authorrefmark{1},
+		Jilin Mei\authorrefmark{1}, 
+		Donghao Xu\authorrefmark{1},
+		Xijun Zhao\authorrefmark{2},
+		Wen Yao\authorrefmark{2},
+		Huijing Zhao\authorrefmark{1}}
+	\authorblockA{\authorrefmark{1}Peking University, Beijing, China}
+	\authorblockA{\authorrefmark{2}China North Vehicle Research Institute, Beijing, China}}
+
+
+% use only for invited papers
+%\specialpapernotice{(Invited Paper)}
+
+% make the title area
+\maketitle
+
+\begin{abstract}
+	This work studies semantic segmentation of 3D LiDAR data at dynamic urban scenes. LiDAR data plays an important role of perception in autonomous driving system. However, most semantic segmentation methods and datasets are designed for camera data nowadays. In this work, we propose a new method which can generate semantic segmentation of LiDAR data and we evaluate its performance on a new public 3D point cloud dataset \textit{PKU-Scapes}\footnotemark[1] collected in dynamic urban scenes by our driving platform. The experiments show that our method can recognize more category labels and achieve an impressive result at dynamic urban scenes.
+\end{abstract}
+
+\footnotetext[1]{Our dataset will be published at \href{http://www.poss.pku.edu.cn/}{www.poss.pku.edu.cn} }
+
+\section{Introduction}
+% no \PARstart
+Scene understanding is crucial for the safe and efficient navigation of autonomous vehicles in complex and dynamic environments, and semantic segmentation is a key technique. 3D LiDAR has been used as one of the main sensors in many prototyping systems for fully autonomous driving\cite{urmson2008autonomous}. Semantic segmentation using 3D LiDAR data is illustrated in Fig. \ref{fig:dynamiccampus}, where given a frame of input data (a), the problem is to find a meaningful label (i.e., object class in this research) for each pixel, super-pixel or region of the data (b). As 3D LiDAR is a 2.5D sensing of the surroundings, it can be represented equivalently in the form of a range image with 3 channels (range/intensity/height) (c)-(d) in the polar coordinate system, and the problem of semantic segmentation can be solved by using either 3D points or range images as the input.
+
+Semantic segmentation using 3D LiDAR data from outdoor scenes has been studied since the past decade \cite{urmson2008autonomous,moosmann2009segmentation,douillard2011segmentation}. The traditional process in these works \cite{munoz2009onboard,zhao2010scene} includes the following steps: (1) preprocessing to divide a whole dataset into locally consistent small units, such as voxels, segments or clusters; (2) extracting a sequence of predefined features; (3) learning a classifier via SVM, random forest etc.; and (4) refining the results using a method such as conditional random field by considering the spatial consistency among neighboring units. On one hand, the criteria of units in preprocessing are empirically defined, for example, the size of voxels\cite{hackel2017isprs}; one the other hand, the traditional methods depend on carefully designed discriminative features, and their adaptability to different scenes remains an open challenge.
+
+The recent success of deep learning in image semantic segmentation has provided new approaches\cite{garcia2017review}. These methods remove the dependence on handcrafted features in an end-to-end manner. Especially, the propose of FCN-based methods\cite{long2015fully} where the semantic segmentation is converted into a pixel-wise classification to reduce the dependence of unit's definition in preprocessing. However, these methods also have substantial demands for finely labeled data\cite{garcia2017review}, and few 3D LiDAR datasets with annotation at the point level to support autonomous driving applications are publicly available. Therefore, the attempts of a point-wise segmentation method for 3D LiDAR data and a fine annotation dataset are necessary.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{fig/Fig1.pdf}
+	\caption{The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and input frame with 3 channels (range/intensity/height). (b) and (d) show the semantic segmentation results.}
+	\label{fig:dynamiccampus}
+\end{figure}	
+
+In this paper, we propose a new 3D LiDAR data semantic segmentation method that takes the range frame with 3 channels (range/intensity/height) as input, then make a point-wise semantic segmentation via a deep neural network combined with spatial constraints. 
+We evaluate its performance on our new public 3D point cloud dataset \textit{PKU-Scapes} collected in dynamic urban scenes by our driving platform. The experiments show that our method can recognize more category labels and achieve an impressive result at dynamic urban scenes.
+
+The remainder of this paper is organized as follows. Related work is discussed in Sect. \uppercase\expandafter{\romannumeral2}. In Sect. \uppercase\expandafter{\romannumeral3}, the proposed method is presented. Then, we present the experimental results in Sect. \uppercase\expandafter{\romannumeral4} and draw conclusions in Sect. \uppercase\expandafter{\romannumeral5}.
+
+
+\section{Related works}
+\subsection{Feature-based Methods}
+Feature-based methods belong to traditional machine learning, and the general process of these methods consists of feature selection, classifier design and graphical model description.
+
+A straightforward technique is to convert semantic segmentation into a point-wise classification that includes extracting the features on each unit, concatenating the features as a vector and determining the label via a well-trained classifier. \cite{weinmann2014semantic} presents a common pipeline from feature selection to classifier training. Due to the irregular arrangement of point clouds, the authors test 5 definitions of neighborhood to achieve the best representation. Similar research is conducted in \cite{hackel2016fast}, which demonstrates the ability to address varying densities of data. A single point cloud usually contains millions of points, so evaluating the label for each point is typically computationally expensive (on the order of minutes according to \cite{hackel2016fast}). 
+
+\cite{hu2013efficient} proposes an efficient approach where speed and accuracy are satisfied simultaneously; furthermore, the average classification time can be reduced to less than 1 s. \cite{zhao2010scene} represents the raw point cloud as a 2D range image and proposes a framework for simultaneous segmentation and classification of the range image that considers both the 2D range image and 3D raw data. Straightforward approaches assume that each data unit is independent and ignore the spatial and contextual relations between units. Consequently, they can produce good results based on distinctive features. However, when the features are not discriminative, the point-wise classification will be noisy and locally inconsistent\cite{munoz2009onboard}.
+
+The neighbor elements are taken into account to make the segmentation results spatially smooth. For this purpose, graphical models such as Markov random Field (MRF) and conditional random field (CRF) are usually exploited to encode the spatial relationships. In \cite{munoz2009contextual}, the node potentials and edge potentials are both formulated with a parametric linear model, and the functional max-margin learning is used to find the optimal weights. \cite{lu2012simplified} proposes a simplified Markov network to infer the contextual relations between points. Instead of learning all the weights for the node and edge potentials in graphical models, the node potentials are calculated from a point-wise classifier, and the edge potentials are determined by the physical distance between points. 
+
+The performance of the above methods largely depends on handcrafted features. These methods are effective in fixed or regular scenarios, but for dynamic scenes, the features are empirically designed and the performance decreases.
+
+\subsection{Deep Learning Methods}
+Deep learning, especially the convolution neural network (CNN) without handcrafted features, has shown effectual performance on 2D image segmentation\cite{garcia2017review}. However, the semantic segmentation of 3D point clouds(i.e., from LiDAR sensors) is still an open research problem\cite{engelmann2017exploring} due to the irregular, not grid-aligned properties. Therefore, recent studies project the point clouds into 2D views, and some of them attempt to directly ways, for example, volumetric/voxel representations.
+
+Inspired by the success of CNN in image segmentation, the state-of-the-art image-based algorithms can be used directly after rendering 2D views from the 3D raw data. \cite{tosteberg2017semantic} projects point clouds into virtual 2D RGB images via Katz projection. Then, a pretrained CNN is used to semantically classify the images. However, this projection removes all the points that are not visible; for example, if a car is projected, all the points behind it are removed. \cite{dewan17iros} unwraps $360^\circ$ 3D LiDAR data onto a spherical 2D plane without point loss. Spherical projection is also applied in SqueezeSeg\cite{wu2017squeezeseg}, where the CNN directly outputs the point-wise label of the transformed LiDAR data and a CRF is applied to refine the outputs. \cite{piewak2018boosting} uses cylindrical projection to create the depth and reflectivity images. In \cite{caltagirone2017fast}, the point clouds are encoded by top-view images and a simple fully convolutional neural network (FCN) is used. This method can be used in real time because only elevation and density features are extracted. In \cite{lawin2017deep}, the input point cloud is projected into multiple views, such as color, depth and surface normal images. 
+
+Another type of method models the raw data in direct ways. \cite{tchapmi2017segcloud} proposes SEGCloud, where the raw 3D point cloud is preprocessed into a voxelized point cloud with a fixed grid size. Although \cite{tchapmi2017segcloud} is simple and effective, how to set the voxel size is a problem in large-scale scenes. Thus, the scene is voxelized at five different resolutions in \cite{hackel2017isprs}, and each of the five scales is handled separately by the CNN. Rather than using a fixed grid size, \cite{riegler2017octnet} proposes OctNet, where the hybrid grid-octree data structure is applied to represent the raw 3D data, and each leaf of the octree stores a pooled feature representation. PointNet\cite{qi2017pointnet} is a unified architecture that directly takes raw point clouds as input and outputs the label of each point. The scene is divided into blocks. Then, the points in each block are passed through a series of multilayer perceptrons (MLPs) to extract the local and global features. Based on \cite{qi2017pointnet}, \cite{engelmann2017exploring} extends the method to incorporate a larger-scale spatial context, and improved results are reported in both indoor and outdoor scenarios. \cite{landrieu2017large} proposes a more elegant architecture to capture contextual relations. The first step is to partition the raw point cloud into geometrically simple shapes, called super-points. The super-points are then embedded by PointNet\cite{qi2017pointnet}.
+
+Semantic segmentation with deep learning is usually implemented in a supervised manner, which requires detailed annotations. However, obtaining point-wise annotations for 3D point clouds is labor intensive and time consuming. Furthermore, few public datasets support this level of annotation. Our method belongs the former brand where the the raw 3D point clouds is converted into 2D range frame, and FCN is combined with spatial constraints to get the pixel-wise semantic segmentation result.
+
+\begin{figure*}[h]
+	\centering
+	\includegraphics[width=0.66\linewidth]{fig/network.pdf}
+	\caption{The framework of our proposed method, which combines a fully convolutional network with spatial constraints.}
+	\label{fig:network}
+\end{figure*}
+
+\section{Methodology}
+
+\subsection{Data Preprocessing}
+The point cloud data for LiDAR is sparse and unorganized, so it is time-consuming to find neighboring relations between different points. In order to process these unorganized point cloud data with deep convolutional neural network, we convert the point cloud data into 2D range image by cylindrical projection. After that, it will be easier to implement deep convolution neural network on the LiDAR data.
+
+After cylindrical projection, the point cloud data will be encoded as a dense matrix with shape of $[H,W,C]$. $H$ means the number of lines for the specific LiDAR sensor (such as $H=32$ for Velodyne HDL-32E). $W$ equals to the number of points within each LiDAR scan line. $C$ is the channels' number in the range image. Here, $C$ is set to 3, which represents $[Range,Intensity,Height]$ three channels.
+
+For each point $p_k=\langle x_k,y_k,z_k\rangle$ from the raw point cloud set $P$, the value of $Range$ in range image $R$ is defined as $r_k$:
+
+\begin{equation}
+r_k=\sqrt{{x_k}^2+{y_k}^2+{z_k}^2},  r_k\subset [0,255]	
+\end{equation} 
+
+Similarly, the values of $Intensity$ and $Height$ are normalized into $[0,255]$. These channels are very important properties of LiDAR data, which are enough to describe various objects in dynamic urban scenes.
+
+\subsection{Problem Definition}
+
+Let $X$ denotes the range image extracted by cylindrical projection of 3D point cloud data $S$. In this kind of projection, there is a one-to-one correspondence between a 3D point in one frame point cloud data and a pixel in the range image $X$. As a result, the semantic segmentation task of 3D point cloud data is equal with giving each pixel $x$ in the range image $X$ a label $y$. The problem of this work is formulated as learning a semantic segmentation model $f_{\theta}$ which maps each pixel $x$ to a label $y\in\{1,...,K\}$, and subsequently associate $y$ to the 3D points of $S$.
+
+\begin{equation}
+f_{\theta}: x\to y \in \{1,...,K\}
+\end{equation}
+
+The data samples are in the form of range images $X$. Given a set of supervised data samples $X_l=\{x_i, y_i\}$, where $\{x_i\}$ traverses each pixel of $X$ and $\{y_i\}$ are labels for $\{x_i\}$, annotated manually by human annotators. 
+In order to learning a semantic segmentation model $f_\theta$, we need to find the best parameter set $\theta^*$ that minimize a loss function $L$ as below.
+
+\begin{equation}
+\theta^{*}=\mathop{\arg\max}_{\theta}L(X_l; \theta)
+\end{equation}
+
+\subsection{Network Architecture and Loss Function}
+We use a fully convolutional network architecture combined with spatial constraints for this semantic segmentation task.
+Compared with common deep convolutional networks, it removes last fully connected layers, and replaces them with the in-network deconvolutional layers. After convolution layers, the network combines predictions from the last convolution layer \textit{conv7}, layer \textit{pool3} and layer \textit{pool4}. It lets the network be able to predict finer details while introducing high-level semantic information. Finally, we extract spatial constraints from range images, and optimize the semantic segmentation results. 
+
+During training procedure, it generally computes weighted cross-entropy loss in pixel-wise, between the predicted labels and ground truths. The network is trained via end-to-end guided by the designed loss function. Because the number of pixels are imbalanced between different classes and a lot of invalid or unknown-class pixels, the following multi-class weighted cross entropy loss function is designed to regular the weights between imbalanced classes.
+
+For labeled data $X_l$, we implement some changes on the widely-used definition of cross entropy, and define loss function $L_l$ as below:
+
+\begin{equation}
+\begin{split}
+&\varGamma_{i,j}=\{
+\begin{array}{lr}
+\overrightarrow{\varphi_k} ,\quad\quad if \quad [y_{i,j}\neq k \quad and\quad y_{i,j}\neq0]	\\
+\overrightarrow{0} ,\quad\quad\quad\quad\quad\quad  otherwise
+\end{array}	\\
+\\
+&\textit{}L_l(X_l,Y_l;\theta)=-\frac{1}{H*W}\sum_{i=0}^{H-1}\sum_{j=0}^{W-1}\sum_{k=0}^K{\varGamma_{i,j}\omega_{k}ln(P^k_{\theta}(x_{i,j}))}
+\end{split}
+\end{equation}
+
+Where $\varGamma_{i,j}$ is a one-hot vector $\varphi_k$ of label $k$, if $y_{i,j}\neq k$ and $y_{i,j}\neq0$. Label 0 means invalid or unknown pixels, including many fine fragments belong to background or hard to be annotated, so we don't want to evaluate these pixels if they are predicted as non-zero labels. $\omega_{k}$ here is used to balance the sample numbers between different labels and $P^k_{\theta}(x_{i,j})$ is the probability that pixel $x_{i,j}$ be assigned a label $k$ by our semantic segmentation model with the set of parameters $\theta$.
+
+
+\subsection{Spatial Constraint}
+The deep learning network proposed in preceding subsection can predict a good looking pixel-wise semantic segmentation result. However, the network's prediction is sometimes noisy and locally inconsistent, because the neighbor pixels'relationship are not taken into account. So we introduce spatial constraints to make the semantic segmentation results more spatially smooth.
+
+
+Firstly, we implement a traditional region grow algorithm to the range image (only with the range channel), and achieve a over-segmentation result. It's mainly based on the feature of distance and consistence between neighbor pixels to split different regions. Particularly, foreground and background need respective parameters for segmentation, because we need different segmentation level of foreground objects and background objects. For example, we hope huge objects like buildings in the background to be segmented as a whole region, but small object like pedestrians need to be distinguished individually.
+
+After over-segmentation, each pixel $ \langle i, j \rangle $ of the range image will get a region ID $Reg_{i,j}$. The spatial constraint $SC_{\Upsilon}$ of region $\Upsilon$ will be calculated as the following formula.
+
+
+\begin{equation}
+SC_\Upsilon = argmax_k \sum_{\langle i, j \rangle \subset \Upsilon}[P_{\theta}(x_{i,j}) = k]
+\end{equation}
+
+If the spatial constraint exceeds a threshold, the pixels in region $\Upsilon$ will be marked as label $k$ . It will make the semantic label more spatial consistent and can clear the noise pixels of predicted result in some degree.
+
+\section{Experiment}
+\subsection{Data Set}
+The performance of the proposed method is evaluated on our new dynamic urban data set \textit{PKU-Scapes}, collected by an instrumented vehicle with a GPS/IMU suite and a Velodyne-HDL32, as shown in Fig.  \ref{fig:collect_route}. The total route contains 1375 LiDAR frames. 880 frames for training, 220 frames for validation and 275 frames for testing.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=1.0\linewidth]{fig/collect_route.pdf}
+	\caption{The routes of data collection and the platform configuration.}
+	\label{fig:collect_route}
+\end{figure}
+
+\begin{table*}
+	\caption{Categories Distribution in Dataset}
+	\label{category_distribution}
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+		\hline
+		- & Pedestrian & Car & Vegetation & Sign/Pole & Building & Cyclist & Bicycle & Road	\\
+		\hline
+		Pixels & 458,673 & 257,239 & 4,661,880 & 80,384 & 6,579,360 & 274,991 & 1,356,518 & 16,856,614	\\
+		\hline
+	\end{tabular}
+\end{table*}
+
+\begin{figure*}
+	\centering
+	\subfigure[Weighted loss leads to better performance of labels with less samples, such as the traffic sign in Box A. And spatial constraint makes semantic segmentation more locally consistent, like the cyclist in Box B.]{
+		\includegraphics[width=0.89\textwidth]{fig/1.pdf}
+		\label{fig:result_1_a}
+	}
+	\subfigure[Box C shows the improvement of a traffic sign's label result by weighted loss. Box D,E are good examples reflecting the benifit of the spatial constraints, which makes pixel labels belonging to one person more uniform.]{
+		\includegraphics[width=0.89\textwidth]{fig/2.pdf}
+		\label{fig:result_1_b}
+	}
+	\caption{Visualization result of semantic segmentation.}
+	\label{fig:result_1}
+\end{figure*}	
+
+High quality pixel-level annotation is necessary for network training. Instead of working on the raw point cloud, human annotators work on the range image where object regions are associated with the ones in adjacent frames. Annotators only need to assign the category of some region in one frame, then a series of associated regions are marked with the same label. Although sometimes the data association brings errors, it largely reduce the annotation time. 
+
+The categories distribution in this dataset is shown in TABLE. \ref{category_distribution}. Obviously, the data distribution is imbalanced between categories. So, we apply each label an unique weight based on data distribution to reduce the influence of data imbalance.
+
+\begin{table*}
+	\caption{semantic segmentation performance (mPA)}
+	\label{performance}
+	\centering
+	\small
+	\renewcommand{\arraystretch}{1.5}
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+		\hline
+		\diagbox{Model}{Label} & Pedestrian & Car & Vegetation & Sign/Pole & Building & Cyclist & Bicycle & Road	\\
+		\hline
+		Baseline & 0.41 & 0.71 & 0.57 & 0.36 & 0.66 & 0.49 & 0.21 & \textbf{0.99}	\\
+		\hline
+		Weighted-Loss& 0.78 & 0.93 & 0.74 & 0.40 & 0.66 & 0.56 & 0.49 & \textbf{0.99}	\\
+		\hline
+		Ours & \textbf{0.79} & \textbf{0.96} & \textbf{0.77} & \textbf{0.44} & \textbf{0.72} & \textbf{0.60} & \textbf{0.55} & 0.98	\\
+		\hline
+	\end{tabular}
+\end{table*}
+
+\begin{figure*} 
+	\centering
+	\subfigure[Confusion matrix of baseline model]{
+		\includegraphics[width=0.31\textwidth]{fig/result_3channel_3.pdf}
+		\label{fig:matrix1}
+	}
+	\subfigure[Confustion matrix of weighted loss model]{
+		\includegraphics[width=0.31\textwidth]{fig/result_newweight_lr5.pdf}
+		\label{fig:matrix2}
+	}
+	\subfigure[Confustion matrix of our proposed model]{
+		\includegraphics[width=0.31\textwidth]{fig/result_seg.pdf}
+		\label{fig:matrix3}
+	}
+	\caption{
+		The confusion matrix on testing dataset, values are shown in percentage.
+		Rows means ground truth labels and columns means predicted labels.
+	}
+	\label{fig:matrix}
+\end{figure*}
+
+\subsection{Setup}
+The input range image size is 1080x32x3, which width is down-sampled for efficiency. A small batch size for training sets will be better. The network is implemented with TensorFlow in the environment with NVIDIA TITAN X GPU. We use the AdamOptimizer with 1e-5 learning rate.
+
+It's important to aware that our data frames are captured sequentially. In order to avoid data correlation between adjacent frames, shuffling them before training process is necessary.
+
+\subsection{Results Evaluation}
+We use mPA (mean pixel accuracy) for quantitative evaluation of semantic segmentation performance. Especially, when calculating the mean pixel accuracy, unknown or invalid pixels with label 0 will not be involved in. The mPA is computed as the following formula, while $\dot{Y}_k$ is the predicted pixel set with label $k$ and $Y_k$ is the ground truth pixel set.
+
+\begin{equation}
+mPA = \dfrac{1}{K}*\sum_{k=1}^{K}\dfrac{\left| \dot{Y}_k \cap Y_k \right|}{\left| \dot{Y}_k\right|}
+\end{equation}
+
+
+As shown in Table. \ref{performance} , we list the semantic segmentation performance (mPA) of each label, and use the result trained with original cross-entropy as baseline for comparison. Obviously, most categories achieve higher mPA performance after use method with weighted loss function. The \textit{pedestrian} label gets 37\% accuracy increase, and not only the category with fewer samples gets higher accuracy, but also the category with large amounts of samples gets higher accuracy, such as the \textit{vegetation}. Based on the weighted loss model, our proposed method with spatial constraints gets even higher performance. However, some categories like \textit{sign/pole} still don't have ideal pixel accuracy by our method. This is most likely for too few pixel samples of these categories, so the deep learning model can't fit the data well.
+
+The qualitative semantic segmentation results are shown in Fig. \ref{fig:result_1}. Dynamic urban scene is very vivid and contains abundant categories objects and details, which is different from simple environment on highway. As we can see in Fig. \ref{fig:result_1_a}, the weighted loss leads to better performance of labels with less samples, such as the traffic sign in Box A and C. Our proposed method with spatial constraint makes semantic segmentation more locally consistent, Box B,D,E in Fig. \ref{fig:result_1_b} give some improved examples.
+
+
+Fig. \ref{fig:matrix} shows the confusion matrix of baseline, weighted-loss model and our proposed model. It's easy to find that our model achieves a great improvement of most categories. However, some confusion between categories still exist, such as many \textit{sign/pole} samples are predicted as \textit{vegetation} and some \textit{cyclist} samples are predicted as \textit{pedestrian}. The second situation is mainly caused by the cyclists close to our vehicle, so only the upper part of the body can be seen.
+
+By the way, there is an interesting explanation for low pixel accuracy of label \textit{sign/pole}. As shown in Fig. \ref{fig:result_1}, we can find that some trees trunks are labeled by \textit{sign/pole}. This is mainly because of the high reflective moth-proofing paint on the trunks, which has high value of intensity and shape as a pole, just like the traffic sign. In order to deal with this situation, we think more high-level information needs to be imported.
+
+
+\section{Conclusion}
+This paper proposes a semantic segmentation method of 3D LiDAR data at dynamic urban scenes. We convert the LiDAR data into the form of range images and use a fully convolutional network to predict the semantic segmentation result. After that, we import spatial constraints to smooth semantic labels distribution and make the result more locally consistent. Finally, our new dataset \textit{PKU-Scapes} is used for evaluation, and find our proposed method distinctly improves the pixel accuracy performance.
+
+There are still much work need to be done in the future. In order to further improve the semantic segmentation performance, object-level information and temporal constraints between samples will be addressed on for this purpose.
+
+
 	
-	% paper title
-	\title{Semantic Segmentation of 3D LiDAR Data at Dynamic Urban Scenes}
-	
-	
-	% avoiding spaces at the end of the author lines is not a problem with
-	% conference papers because we don't use \thanks or \IEEEmembership
-	
-	
-	\author{\authorblockN
-		{Biao Gao\authorrefmark{1},
-			Jilin Mei\authorrefmark{1}, 
-			Donghao Xu\authorrefmark{1},
-			Xijun Zhao\authorrefmark{2},
-			Wen Yao\authorrefmark{2},
-			Huijing Zhao\authorrefmark{1}}
-		\authorblockA{\authorrefmark{1}Peking University, Beijing, China}
-		\authorblockA{\authorrefmark{2}China North Vehicle Research Institute, Beijing, China}}
-	
-	
-	% use only for invited papers
-	%\specialpapernotice{(Invited Paper)}
-	
-	% make the title area
-	\maketitle
-	
-	\begin{abstract}
-		This work studies semantic segmentation of 3D LiDAR data at dynamic urban scenes. LiDAR data plays an important role of perception in autonomous driving system. However, most semantic segmentation methods and datasets are designed for camera data nowadays. In this work, we propose a method which can generate semantic segmentation of LiDAR data and we evaluate its performance on a new 3D point cloud dataset collected in dynamic urban scenes by our driving platform. The experiments show that our method can recognize more kinds of labels and achieve an impressive result in dynamic urban scenes.
-	\end{abstract}
-	
-	% no key words
-	
-	\section{Introduction}
-	% no \PARstart
-	Scene understanding is crucial for the safe and efficient navigation of autonomous vehicles in complex and dynamic environments, and semantic segmentation is a key technique. 3D LiDAR has been used as one of the main sensors in many prototyping systems for fully autonomous driving\cite{urmson2008autonomous}. Semantic segmentation using 3D LiDAR data is illustrated in Fig. \ref{fig:dynamiccampus}, where given a frame of input data (a), the problem is to find a meaningful label (i.e., object class in this research) for each pixel, super-pixel or region of the data (b). As 3D LiDAR is a 2.5D sensing of the surroundings, it can be represented equivalently in the form of a range image (c)-(d) in the polar coordinate system, and the problem of semantic segmentation can be solved by using either 3D points or range images as the input.
-	
-	Semantic segmentation using 3D LiDAR data from outdoor scenes has been studied since the past decade \cite{urmson2008autonomous,moosmann2009segmentation,douillard2011segmentation}. The traditional process in these works \cite{munoz2009onboard,zhao2010scene} includes the following steps: (1) preprocessing to divide a whole dataset into locally consistent small units, such as voxels, segments or clusters; (2) extracting a sequence of predefined features; (3) learning a classifier via SVM, random forest etc.; and (4) refining the results using a method such as conditional random field by considering the spatial consistency among neighboring units. On one hand, the criteria of units in preprocessing are empirically defined, for example, the size of voxels\cite{hackel2017isprs}; one the other hand, the traditional methods depend on carefully designed discriminative features, and their adaptability to different scenes remains an open challenge.
-	
-	\begin{figure}
-		\centering
-		\includegraphics[width=0.5\textwidth]{fig/Fig1.png}
-		\caption{The semantic segmentation for dynamic scene. (a) and (c) show the input data in two kinds of formats, i.e., the raw 3D point clouds and range frame. (b) and (d) show the semantic segmentation results.}
-		\label{fig:dynamiccampus}
-	\end{figure}	
-	
-	The recent success of deep learning in image semantic segmentation has provided new approaches\cite{garcia2017review}. These methods remove the dependence on handcrafted features in an end-to-end manner. Especially, the propose of FCN-based methods\cite{long2015fully} where the semantic segmentation is converted into a pixel-wise classification to reduce the dependence of unit's definition in preprocessing. However, these methods also have substantial demands for finely labeled data\cite{garcia2017review}, and few 3D LiDAR datasets with annotation at the point level to support autonomous driving applications are publicly available. Therefore, the attempts of a point-wise segmentation method for 3D LiDAR data and a fine annotation dataset are necessary.
-	
-	In this paper, we propose a new 3D LiDAR data semantic segmentation method that takes the range frame as input and make a point-wise classification via deep neural network. We evaluate its performance on a new 3D point cloud dataset collected in dynamic urban scenes by our driving platform. The experiments show that our method can recognize more kinds of labels and achieve an impressive result in dynamic urban scenes.
-	
-	The remainder of this paper is organized as follows. Related work is discussed in Sect. \uppercase\expandafter{\romannumeral2}. In Sect. \uppercase\expandafter{\romannumeral3}, the proposed method is presented. Then, we present the experimental results in Sect. \uppercase\expandafter{\romannumeral4} and draw conclusions in Sect. \uppercase\expandafter{\romannumeral5}.
-	
-	
-	\section{Related works}
-	\subsection{Feature-based Methods}
-	Feature-based methods belong to traditional machine learning, and the general process of these methods consists of feature selection, classifier design and graphical model description.
-	
-	A straightforward technique is to convert semantic segmentation into a point-wise classification that includes extracting the features on each unit, concatenating the features as a vector and determining the label via a well-trained classifier. \cite{weinmann2014semantic} presents a common pipeline from feature selection to classifier training. Due to the irregular arrangement of point clouds, the authors test 5 definitions of neighborhood to achieve the best representation. Similar research is conducted in \cite{hackel2016fast}, which demonstrates the ability to address varying densities of data. A single point cloud usually contains millions of points, so evaluating the label for each point is typically computationally expensive (on the order of minutes according to \cite{hackel2016fast}). 
-	
-	\cite{hu2013efficient} proposes an efficient approach where speed and accuracy are satisfied simultaneously; furthermore, the average classification time can be reduced to less than 1 s. \cite{zhao2010scene} represents the raw point cloud as a 2D range image and proposes a framework for simultaneous segmentation and classification of the range image that considers both the 2D range image and 3D raw data. Straightforward approaches assume that each data unit is independent and ignore the spatial and contextual relations between units. Consequently, they can produce good results based on distinctive features. However, when the features are not discriminative, the point-wise classification will be noisy and locally inconsistent\cite{munoz2009onboard}.
-	
-	The neighbor elements are taken into account to make the segmentation results spatially smooth. For this purpose, graphical models such as Markov random Field (MRF) and conditional random field (CRF) are usually exploited to encode the spatial relationships. In \cite{munoz2009contextual}, the node potentials and edge potentials are both formulated with a parametric linear model, and the functional max-margin learning is used to find the optimal weights. \cite{lu2012simplified} proposes a simplified Markov network to infer the contextual relations between points. Instead of learning all the weights for the node and edge potentials in graphical models, the node potentials are calculated from a point-wise classifier, and the edge potentials are determined by the physical distance between points. 
-	
-	The performance of the above methods largely depends on handcrafted features. These methods are effective in fixed or regular scenarios, but for dynamic scenes, the features are empirically designed and the performance decreases.
-	
-	\subsection{Deep Learning Methods}
-	Deep learning, especially the convolution neural network (CNN) without handcrafted features, has shown effectual performance on 2D image segmentation\cite{garcia2017review}. However, the semantic segmentation of 3D point clouds(i.e., from LiDAR sensors) is still an open research problem\cite{engelmann2017exploring} due to the irregular, not grid-aligned properties. Therefore, recent studies project the point clouds into 2D views, and some of them attempt to directly ways, for example, volumetric/voxel representations.
-	
-	Inspired by the success of CNN in image segmentation, the state-of-the-art image-based algorithms can be used directly after rendering 2D views from the 3D raw data. \cite{tosteberg2017semantic} projects point clouds into virtual 2D RGB images via Katz projection. Then, a pretrained CNN is used to semantically classify the images. However, this projection removes all the points that are not visible; for example, if a car is projected, all the points behind it are removed. \cite{dewan17iros} unwraps $360^\circ$ 3D LiDAR data onto a spherical 2D plane without point loss. Spherical projection is also applied in SqueezeSeg\cite{wu2017squeezeseg}, where the CNN directly outputs the point-wise label of the transformed LiDAR data and a CRF is applied to refine the outputs. \cite{piewak2018boosting} uses cylindrical projection to create the depth and reflectivity images. In \cite{caltagirone2017fast}, the point clouds are encoded by top-view images and a simple fully convolutional neural network (FCN) is used. This method can be used in real time because only elevation and density features are extracted. In \cite{lawin2017deep}, the input point cloud is projected into multiple views, such as color, depth and surface normal images. 
-	
-	Another type of method models the raw data in direct ways. \cite{tchapmi2017segcloud} proposes SEGCloud, where the raw 3D point cloud is preprocessed into a voxelized point cloud with a fixed grid size. Although \cite{tchapmi2017segcloud} is simple and effective, how to set the voxel size is a problem in large-scale scenes. Thus, the scene is voxelized at five different resolutions in \cite{hackel2017isprs}, and each of the five scales is handled separately by the CNN. Rather than using a fixed grid size, \cite{riegler2017octnet} proposes OctNet, where the hybrid grid-octree data structure is applied to represent the raw 3D data, and each leaf of the octree stores a pooled feature representation. PointNet\cite{qi2017pointnet} is a unified architecture that directly takes raw point clouds as input and outputs the label of each point. The scene is divided into blocks. Then, the points in each block are passed through a series of multilayer perceptrons (MLPs) to extract the local and global features. Based on \cite{qi2017pointnet}, \cite{engelmann2017exploring} extends the method to incorporate a larger-scale spatial context, and improved results are reported in both indoor and outdoor scenarios. \cite{landrieu2017large} proposes a more elegant architecture to capture contextual relations. The first step is to partition the raw point cloud into geometrically simple shapes, called super-points. The super-points are then embedded by PointNet\cite{qi2017pointnet}.
-	
-	Semantic segmentation with deep learning is usually implemented in a supervised manner, which requires detailed annotations. However, obtaining point-wise annotations for 3D point clouds is labor intensive and time consuming. Furthermore, few public datasets support this level of annotation. Our method belongs the former brand where the the raw 3D point clouds is converted into 2D range frame, and FCN is applied .............
-	
-	\section{Methodology}
-	
-	\subsection{Data Preprocessing}
-	The point cloud data for LiDAR is sparse and unorganized, so it is time-consuming to find neighboring relations between different points. In order to process these unorganized point cloud data with deep convolutional neural network, we convert the point cloud data into 2D range image by cylindrical projection. After that, it will be easier to implement deep convolution neural network on the LiDAR data.
-	
-	After cylindrical projection, the point cloud data will be encoded as a dense matrix with shape of $[H,W,C]$. $H$ means the number of lines for the specific LiDAR sensor (such as $H=32$ for Velodyne HDL-32E). $W$ equals to the number of points within each LiDAR scan line. $C$ is the channels' number in the range image. Here, $C$ is set to 3, which represents $[Range,Intensity,Height]$ three channels.
-	
-	For each point $p_k=\langle x_k,y_k,z_k\rangle$ from the raw point cloud set $P$, the value of $Range$ in range image $R$ is defined as $r_k$:
-	
-	\begin{equation}
-	r_k=\sqrt{{x_k}^2+{y_k}^2+{z_k}^2},  r_k\subset [0,255]	
-	\end{equation} 
-	
-	Similarly, the values of $Intensity$ and $Height$ are normalized into $[0,255]$. These channels are very important properties of LiDAR data, which are enough to describe various objects in dynamic urban scenes.
-	
-	\subsection{Problem Definition}
-	
-	Let $X$ denotes the range image extracted by cylindrical projection of 3D point cloud data $S$. In this kind of projection, there is a one-to-one correspondence between a 3D point in one frame point cloud data and a pixel in the range image $X$. As a result, the semantic segmentation task of 3D point cloud data is equal with giving each pixel $x$ in the range image $X$ a label $y$. The problem of this work is formulated as learning a semantic segmentation model $f_{\theta}$ which maps each pixel $x$ to a label $y\in\{1,...,K\}$, and subsequently associate $y$ to the 3D points of $S$.
-	
-	\begin{equation}
-	f_{\theta}: x\to y \in \{1,...,K\}
-	\end{equation}
-	
-	The data samples are in the form of range images $X$. Given a set of supervised data samples $X_l=\{x_i, y_i\}$, where $\{x_i\}$ traverses each pixel of $X$ and $\{y_i\}$ are labels for $\{x_i\}$, annotated manually by human annotators. 
-	In order to learning a semantic segmentation model $f_\theta$, we need to find the best parameter set $\theta^*$ that minimize a loss function $L$ as below.
-	
-	\begin{equation}
-	\theta^{*}=\mathop{\arg\max}_{\theta}L(X_l; \theta)
-	\end{equation}
-	
-	\subsection{Network Architecture and Loss Function}
-	We use a FCN (Fully Convolutional Network) architecture for this semantic segmentation task.
-	Compared with common deep convolutional networks, it removes last fully connected layers, and replaces them with the in-network up-sampled or de-convolutional predictions of convolutional layers as predicted feature maps. During training procedure, it generally computes cross-entropy like losses in pixel-wise, between the predicted labels and ground truths.
-	
-	Our network is trained via end-to-end guided by the designed loss function. Because the number of pixels are imbalanced between different classes and a lot of invalid or unknown-class pixels, the following multi-class weighted cross entropy loss function is designed to regular the weights between imbalanced classes.
-	
-	For labeled data $X_l$, we implement some changes on the widely-used definition of cross entropy, and define loss function $L_l$ as below:
-	
-	\begin{equation}
-	\begin{split}
-	&\varGamma_{i,j}=\{
-	\begin{array}{lr}
-	\overrightarrow{\varphi_k} ,\quad\quad if \quad [y_{i,j}\neq k \quad and\quad y_{i,j}\neq0]	\\
-	\overrightarrow{0} ,\quad\quad\quad\quad\quad\quad  otherwise
-	\end{array}	\\
-	\\
-	&\textit{}L_l(X_l,Y_l;\theta)=-\frac{1}{H*W}\sum_{i=0}^{H-1}\sum_{j=0}^{W-1}\sum_{k=0}^K{\varGamma_{i,j}\omega_{k}ln(P^k_{\theta}(x_{i,j}))}
-	\end{split}
-	\end{equation}
-	
-	Where $\varGamma_{i,j}$ is a one-hot vector $\varphi_k$ of label $k$, if $y_{i,j}\neq k$ and $y_{i,j}\neq0$. Label 0 means invalid or unknown pixels, including many fine fragments belong to background or hard to be annotated, so we don't want to evaluate these pixels if they are predicted as non-zero labels. $\omega_{k}$ here is used to balance the sample numbers between different labels and $P^k_{\theta}(x_{i,j})$ is the probability that pixel $x_{i,j}$ be assigned a label $k$ by our semantic segmentation model with the set of parameters $\theta$.
-	
-	\section{Experiment}
-	\subsection{Data Set}
-	The performance of the proposed method is evaluated on a dynamic campus data set collected by an instrumented vehicle, which has a GPS/IMU suite and a Velodyne-HDL32, as shown in Fig. \ref{fig:collect_route}. The total route contains 1375 LiDAR frames. 880 frames for training, 220 frames for validation and 275 frames for testing.
-	
-	\begin{figure}[ht]
-		\centering
-		\includegraphics[width=1.0\linewidth]{fig/collect_route}
-		% 这个图要更新！！！！！！！！！
-		\caption{The routes of data collection and the platform configuration.}
-		\label{fig:collect_route}
-	\end{figure}
-	
-	\begin{table*}
-		\caption{Categories Distribution in Dataset}
-		\label{category_distribution}
-		\centering
-		\small
-		\renewcommand{\arraystretch}{1.5}
-		\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
-			\hline
-			- & Pedestrian & Car & Vegetation & Sign/Pole & Building & Cyclist & Bicycle & Road	\\
-			\hline
-			Pixels & 458,673 & 257,239 & 4,661,880 & 80,384 & 6,579,360 & 274,991 & 1,356,518 & 16,856,614	\\
-			\hline
-		\end{tabular}
-	\end{table*}
-	
-	High quality pixel-level annotation is necessary for network training. Instead of working on the raw point cloud, human annotators work on the range image where object regions are associated with the ones in adjacent frames. Annotators only need to assign the category of some region in one frame, then a series of associated regions are marked with the same label. Although sometimes the data association brings errors, it largely reduce the annotation time. 
-	
-	The categories distribution in this dataset is shown in TABLE . \ref{category_distribution}. Obviously, the data distribution is imbalanced between categories. So, we apply each label an unique weight based on data distribution to reduce the influence of data imbalance.
-	
-	\subsection{Setup}
-	Our method is implemented with a FCN (Fully Convolutional Network). The range image size is 1080x32, which width is down-sampled for efficiency. A small batch size for training sets will be better. The network is implemented with TensorFlow in the environment with NVIDIA TITAN X GPU. We use the AdamOptimizer with 1e-5 learning rate.
-	
-	It's important to aware that our data frames are captured sequentially. In order to avoid data correlation between adjacent frames, shuffling them before training process is necessary.
-	
-	\subsection{Results Evaluation}
-	We use mPA (mean pixel accuracy) for quantitative evaluation of semantic segmentation performance. Specially, when calculating the mean pixel accuracy, unknown or invalid pixels with label 0 will not be involved in. The mPA is computed as the following formula, while $\dot{Y}_k$ is the predicted pixel set with label $k$ and $Y_k$ is the ground truth pixel set.
-	
-	\begin{equation}
-	mPA = \dfrac{1}{K}*\sum_{k=1}^{K}\dfrac{\left| \dot{Y}_k \cap Y_k \right|}{\left| \dot{Y}_k\right|}
-	\end{equation}
-	
-	As shown in Table. \ref{performance} , we list the semantic segmentation performance (mPA) of each label, and use the result trained with original cross-entropy as baseline for comparison. Obviously, most categories achieve higher mPA performance after use our proposed method with weighted loss function. Especially, the \textit{pedestrian} label gets 37\% accuracy increase, and not only the category with fewer samples gets higher accuracy, but also the category with large amounts of samples gets higher accuracy, such as the \textit{vegetation}. However, some categories like \textit{sign/pole} still don't have ideal pixel accuracy by our method. This is most likely for too few pixel samples of these categories, so the deep learning model can't fit the data well.
-	
-	The qualitative semantic segmentation results are shown in Fig.\ref{fig:result_1}. Dynamic urban scene is very vivid and contains abundant categories objects and details, which is different from simple environment on highway. As we can see in Fig.\ref{fig:result_1_a}, the weighted loss leads to better performance of labels with less samples, such as the traffic sign in Box A. Similarly, Box B,C,D in Fig.\ref{fig:result_1_b} also give some improved examples.
-	
-	\begin{table*}
-		\caption{semantic segmentation performance (mPA)}
-		\label{performance}
-		\centering
-		\small
-		\renewcommand{\arraystretch}{1.5}
-		\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
-			\hline
-			- & Pedestrian & Car & Vegetation & Sign/Pole & Building & Cyclist & Bicycle & Road	\\
-			\hline
-			Baseline Model & 0.41 & 0.71 & 0.57 & 0.36 & \textbf{0.66} & 0.49 & 0.21 & \textbf{0.99}	\\
-			\hline
-			Weighted-Loss Model& \textbf{0.78} & \textbf{0.93} & \textbf{0.74} & \textbf{0.40} & \textbf{0.66} & \textbf{0.56} & \textbf{0.49} & \textbf{0.99}	\\
-			\hline
-		\end{tabular}
-	\end{table*}
-	
-	\begin{figure*}
-		\centering
-		\subfigure[Weighted loss leads to better performance of labels with less samples, such as the traffic sign in Box A.]{
-			\includegraphics[width=0.9\textwidth]{fig/1.pdf}
-			\label{fig:result_1_a}
-		}
-		\subfigure[Weighted loss version segmentation model can achieve more balanced result than the baseline. For example, Box B shows the improvement of a traffic sign's label result, and Box C,D include the results improvement of pedestrain.]{
-			\includegraphics[width=0.9\textwidth]{fig/2.pdf}
-			\label{fig:result_1_b}
-		}
-		\caption{Visualization result of semantic segmentation.}
-		\label{fig:result_1}
-	\end{figure*}	
-	
-	\begin{figure*} 
-		\centering
-		\subfigure[Confusion matrix of baseline model]{
-			\includegraphics[width=0.35\textwidth]{fig/result_3channel_3.pdf}
-			\label{fig:matrix1}
-		}
-		\hspace{.5in}
-		\subfigure[Confustion matrix of weighted loss model]{
-			\includegraphics[width=0.35\textwidth]{fig/result_newweight_lr5.pdf}
-			\label{fig:matrix2}
-		}
-		
-		\caption{
-			The confusion matrix on testing dataset, values in matrices are shown in percentage.
-			\protect\\
-			Rows means ground truth labels and columns means predicted labels.
-		}
-		\label{fig:matrix}
-	\end{figure*}
-	
-	Fig.\ref{fig:matrix} shows the confusion matrix of baseline and weighted-loss model. It's easy to find that our model achieves a great improvement of most categories. However, some confusion between categories still exist, such as many \textit{sign/pole} samples are predicted as \textit{vegetation} and some \textit{cyclist} samples are predicted as \textit{pedestrian}. The second situation is mainly caused by the cyclists close to our vehicle, so only the upper part of the body can be seen.
-	
-	By the way, there is an interesting explanation for low pixel accuracy of label \textit{sign/pole}. As shown in Fig.\ref{fig:result_1_b}, we can find that some trees trunks are labeled by \textit{sign/pole}. This is mainly because of the high reflective moth-proofing paint on the trunks, which has high value of intensity and shape as a pole, just like the traffic sign. In order to deal with this situation, maybe object-level information needs to be imported.
-	
-	
-	\section{Conclusion}
-	This paper proposes a semantic segmentation method of 3D LiDAR data at dynamic urban scenes. We convert the LiDAR data into the form of range images and use a fully convolutional network to predict the semantic segmentation result. We use our new dataset for evaluation, and find the weighted loss distinctly improves the pixel accuracy performance.
-	
-	There are still much work need to be done in the future. In order to further improve the semantic segmentation performance, object-level information, spacial and temporal constraints between samples will be addressed on.
-	
-	
-		
 \bibliographystyle{IEEEtran}
 \bibliography{myref}
-		
-		
-		% that's all folks
+	
+	
+	% that's all folks
 \end{document}
